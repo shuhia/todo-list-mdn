@@ -1,19 +1,16 @@
 import React from "react";
 
-function FilterButton({ name, filterTasks: setFilter }) {
-  function filter(e) {
-    setFilter(name);
-  }
+function FilterButton(props) {
   return (
     <button
       type="button"
       className="btn toggle-btn"
-      aria-pressed="true"
-      onClick={filter}
+      aria-pressed={props.isPressed}
+      onClick={() => props.setFilter(props.name)}
     >
       <span className="visually-hidden">Show </span>
-      <span>{name}</span>
-      <span className="visually-hidden">tasks</span>
+      <span>{props.name}</span>
+      <span className="visually-hidden"> tasks</span>
     </button>
   );
 }

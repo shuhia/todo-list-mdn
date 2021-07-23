@@ -7,19 +7,35 @@ import React, { useState } from "react";
 import { nanoid } from "nanoid";
 
 function App({ data, ...rest }) {
+  const FILTER_MAP = {
+    All: () => true,
+    Active: (task) => !task.completed,
+    Completed: (task) => task.completed,
+  };
+  const FILTER_NAMES = Object.keys(FILTER_MAP);
+
   const [tasks, setTasks] = useState(data);
   const [filter, setFilter] = useState("All");
+  const filterList = FILTER_NAMES.map((name) => (
+    <FilterButton
+      key={name}
+      name={name}
+      isPressed={name === filter}
+      setFilter={setFilter}
+    />
+  ));
   const taskList = tasks
-    .filter((task) => {
-      return true;
-    })
+    .filter(FILTER_MAP[filter])
     .map((task) => (
       <Todo
-        {...task}
+        id={task.id}
+        name={task.name}
+        completed={task.completed}
         key={task.id}
         toggleTaskCompleted={toggleTaskCompleted}
         deleteTask={deleteTask}
-      ></Todo>
+        editTask={editTask}
+      />
     ));
   function addTask(name) {
     const task = {
@@ -49,18 +65,25 @@ function App({ data, ...rest }) {
     setTasks(remainingTasks);
   }
 
+  function editTask(id, newName) {
+    const editedTaskList = tasks.map((task) => {
+      // if this task has the same ID as the edited task
+      if (id === task.id) {
+        //
+        return { ...task, name: newName };
+      }
+      return task;
+    });
+    setTasks(editedTaskList);
+  }
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
   const headingText = `${taskList.length} tasks remaining`;
 
   return (
     <div className="todoapp stack-large">
-      <h1>TodoMatic</h1>
+      <h1>Todo</h1>
       <Form addTask={addTask} />
-      <div className="filters btn-group stack-exception">
-        <FilterButton name="All" setFilter={setFilter} />
-        <FilterButton name="Active" setFilter={setFilter} />
-        <FilterButton name="Completed" setFilter={setFilter} />
-      </div>
+      <div className="filters btn-group stack-exception">{filterList}</div>
       <h2 id="list-heading">{headingText}</h2>
       <ul
         role="list"
