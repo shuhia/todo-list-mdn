@@ -1,23 +1,74 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import Todo from "./components/Todo";
+import Form from "./components/Form";
+import FilterButton from "./components/FilterButton";
+import React, { useState } from "react";
+import { nanoid } from "nanoid";
 
-function App() {
+function App({ data, ...rest }) {
+  const [tasks, setTasks] = useState(data);
+  const [filter, setFilter] = useState("All");
+  const taskList = tasks
+    .filter((task) => {
+      return true;
+    })
+    .map((task) => (
+      <Todo
+        {...task}
+        key={task.id}
+        toggleTaskCompleted={toggleTaskCompleted}
+        deleteTask={deleteTask}
+      ></Todo>
+    ));
+  function addTask(name) {
+    const task = {
+      id: "todo-" + nanoid(),
+      name: name,
+      completed: false,
+    };
+
+    setTasks((prev) => [...prev, task]);
+  }
+
+  function toggleTaskCompleted(id) {
+    const updatedTasks = tasks.map((task) => {
+      // if this task has the same ID as the edited task
+      if (id === task.id) {
+        // use object spread to make a new object
+        // whose `completed` prop has been inverted
+        return { ...task, completed: !task.completed };
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+  }
+
+  function deleteTask(id) {
+    const remainingTasks = tasks.filter((task) => id !== task.id);
+    setTasks(remainingTasks);
+  }
+
+  const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
+  const headingText = `${taskList.length} tasks remaining`;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="todoapp stack-large">
+      <h1>TodoMatic</h1>
+      <Form addTask={addTask} />
+      <div className="filters btn-group stack-exception">
+        <FilterButton name="All" setFilter={setFilter} />
+        <FilterButton name="Active" setFilter={setFilter} />
+        <FilterButton name="Completed" setFilter={setFilter} />
+      </div>
+      <h2 id="list-heading">{headingText}</h2>
+      <ul
+        role="list"
+        className="todo-list stack-large stack-exception"
+        aria-labelledby="list-heading"
+      >
+        {taskList}
+      </ul>
     </div>
   );
 }
